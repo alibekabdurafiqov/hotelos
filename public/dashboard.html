@@ -136,10 +136,12 @@ const HOST = location.hostname === 'localhost' || location.hostname === '127.0.0
   ? 'localhost' 
   : location.hostname;
 
-const RECEPTION = `http://${HOST}:7001`;
-const HOUSEKEEPING = `http://${HOST}:7002`;
-const ROOMSERVICE = `http://${HOST}:7003`;
-const MAINTENANCE = `http://${HOST}:7004`;
+// All APIs go through the broker on port 7000 (which proxies to microservices)
+const BASE_API = `http://${HOST}:7000`;
+const RECEPTION = BASE_API;
+const HOUSEKEEPING = BASE_API;
+const ROOMSERVICE = BASE_API;
+const MAINTENANCE = BASE_API;
 
 let ws = null;
 let cleaningRoomNumbers = new Set();
