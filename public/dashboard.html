@@ -298,7 +298,8 @@ document.getElementById('connectBtn').addEventListener('click', () => {
   const token = document.getElementById('tokenInput').value.trim();
   if (ws) ws.close();
   const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const wsUrl = `${protocol}//${HOST}:7000/?role=dashboard&token=${encodeURIComponent(token)}`;
+  const port = location.port ? `:${location.port}` : '';
+  const wsUrl = `${protocol}//${location.hostname}${port}/?role=dashboard&token=${encodeURIComponent(token)}`;
   ws = new WebSocket(wsUrl);
   const stateEl = document.getElementById('connState');
 
