@@ -42,39 +42,7 @@ const MIME = {
 
 const httpServer = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://localhost');
-  
-  // API proxy routing (forward to microservices)
-  const pathname = url.pathname;
-  let proxyTarget = null;
-  
-  if (pathname.startsWith('/rooms') || pathname.startsWith('/guests') || pathname.startsWith('/checkin') || pathname.startsWith('/checkout')) {
-    proxyTarget = 'http://localhost:7001';
-  } else if (pathname.startsWith('/queue') || pathname.startsWith('/advance')) {
-    proxyTarget = 'http://localhost:7002';
-  } else if (pathname.startsWith('/orders') || pathname.startsWith('/advance')) {
-    proxyTarget = 'http://localhost:7003';
-  } else if (pathname.startsWith('/issues') || pathname.startsWith('/resolve')) {
-    proxyTarget = 'http://localhost:7004';
-  }
-  
-  // Proxy API requests to microservices
-  if (proxyTarget) {
-    const proxyUrl = new URL(req.url, proxyTarget);
-    const proxyReq = http.request(proxyUrl, { method: req.method, headers: req.headers }, (proxyRes) => {
-      res.writeHead(proxyRes.statusCode, proxyRes.headers);
-      proxyRes.pipe(res);
-    });
-    proxyReq.on('error', (err) => {
-      logger.error('Proxy error:', err);
-      res.writeHead(502);
-      res.end('Bad Gateway');
-    });
-    req.pipe(proxyReq);
-    return;
-  }
-  
-  // Serve static dashboard files
-  let filePath = pathname === '/' ? '/dashboard.html' : pathname;
+  let filePath = url.pathname === '/' ? '/dashboard.html' : url.pathname;
   const fullPath = path.join(PUBLIC_DIR, filePath);
 
   // Basic path traversal protection (NFR-01 style hygiene, even for static files).

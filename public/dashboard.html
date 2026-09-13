@@ -131,17 +131,21 @@
 </main>
 
 <script>
-// Detect if running on production or localhost
-const HOST = location.hostname === 'localhost' || location.hostname === '127.0.0.1' 
-  ? 'localhost' 
-  : location.hostname;
+// Microservice API URLs
+// For local development: each service has its own port
+// For production (Render): configure via environment or use API_BASE_URL
+const API_BASE_PORT = {
+  reception: 7001,
+  housekeeping: 7002,
+  roomservice: 7003,
+  maintenance: 7004
+};
 
-// All APIs go through the broker on port 7000 (which proxies to microservices)
-const BASE_API = `http://${HOST}:7000`;
-const RECEPTION = BASE_API;
-const HOUSEKEEPING = BASE_API;
-const ROOMSERVICE = BASE_API;
-const MAINTENANCE = BASE_API;
+const HOST = location.hostname;
+const RECEPTION = `http://${HOST}:${API_BASE_PORT.reception}`;
+const HOUSEKEEPING = `http://${HOST}:${API_BASE_PORT.housekeeping}`;
+const ROOMSERVICE = `http://${HOST}:${API_BASE_PORT.roomservice}`;
+const MAINTENANCE = `http://${HOST}:${API_BASE_PORT.maintenance}`;
 
 let ws = null;
 let cleaningRoomNumbers = new Set();
