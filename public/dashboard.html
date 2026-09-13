@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8" />
+<title>HotelOS — Operatsiyalar Paneli</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #1e293b; --border: #334155;
+    --text: #e2e8f0; --muted: #94a3b8; --accent: #38bdf8;
+    --ok: #22c55e; --warn: #f59e0b; --crit: #ef4444;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); }
+  header { padding: 14px 20px; border-bottom: 1px solid var(--border); display:flex; align-items:center; gap:16px; flex-wrap:wrap;}
+  header h1 { font-size: 18px; margin: 0; }
+  #authBar { display:flex; gap:8px; align-items:center; margin-left:auto; }
+  #connState { font-size: 13px; padding: 3px 10px; border-radius: 12px; }
+  .st-off { background:#450a0a; color:#fca5a5; }
+  .st-on { background:#052e16; color:#86efac; }
+  main { padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; }
+  section { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+  section h2 { margin: 0 0 10px; font-size: 15px; color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 600; }
+  .badge { padding: 2px 7px; border-radius: 8px; font-size: 11px; }
+  .b-toza { background:#052e16; color:#86efac; }
+  .b-iflos { background:#450a0a; color:#fca5a5; }
+  .b-tozalanmoqda { background:#422006; color:#fcd34d; }
+  .b-texnik_xizmatda { background:#3b0764; color:#d8b4fe; }
+  .b-kritik { background:#450a0a; color:#fca5a5; }
+  .b-yuqori { background:#422006; color:#fcd34d; }
+  .b-normal { background:#1e3a8a; color:#93c5fd; }
+  .b-past { background:#1e293b; color:#94a3b8; }
+  form.inline { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+  input, select, button { background:#0b1220; color:var(--text); border:1px solid var(--border); border-radius:6px; padding:5px 8px; font-size:13px; }
+  button { cursor:pointer; background:#0369a1; border-color:#0369a1; }
+  button:hover { background:#0284c7; }
+  button.mini { padding:2px 6px; font-size:11px; }
+  #log { grid-column: 1 / -1; max-height: 220px; overflow-y:auto; font-family: ui-monospace, monospace; font-size:12px; }
+  #log div { padding:2px 0; border-bottom:1px dotted #334155; }
+  .muted { color: var(--muted); font-size: 12px; }
+  .err { color: var(--crit); font-size:12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🏨 HotelOS — Operatsiyalar Paneli</h1>
+  <div id="authBar">
+    <input id="tokenInput" placeholder="Panel tokeni" value="hotelos-admin" />
+    <button id="connectBtn">Ulanish</button>
+    <span id="connState" class="st-off">Ulanmagan</span>
+  </div>
+</header>
+
+<main>
+
+  <section>
+    <h2>Xonalar holati</h2>
+    <form class="inline" id="checkinForm">
+      <input name="guestName" placeholder="Mehmon ismi" required style="flex:1 1 120px" />
+      <select name="roomType">
+        <option value="bir_kishilik">Bir kishilik</option>
+        <option value="ikki_kishilik">Ikki kishilik</option>
+        <option value="lyuks">Lyuks</option>
+        <option value="nogironlarga_moslashtirilgan">Nogironlarga moslashtirilgan</option>
+      </select>
+      <input name="nights" type="number" min="1" value="1" style="width:60px" title="Tunlar soni"/>
+      <input name="floorPreference" type="number" min="1" max="2" placeholder="Qavat (ixt.)" style="width:110px"/>
+      <button type="submit">Check-in</button>
+    </form>
+    <div id="checkinMsg" class="muted"></div>
+    <table>
+      <thead><tr><th>Xona</th><th>Qavat</th><th>Turi</th><th>Holat</th><th>Band?</th></tr></thead>
+      <tbody id="roomsBody"></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Check-out</h2>
+    <form class="inline" id="checkoutForm">
+      <input name="roomNumber" placeholder="Xona raqami" required style="width:110px"/>
+      <input name="discount" type="number" min="0" placeholder="Chegirma" style="width:100px"/>
+      <button type="submit">Check-out</button>
+    </form>
+    <div id="checkoutMsg" class="muted"></div>
+  </section>
+
+  <section>
+    <h2>Xona xizmati buyurtmalari</h2>
+    <form class="inline" id="orderForm">
+      <input name="roomNumber" placeholder="Xona" required style="width:80px"/>
+      <input name="itemName" placeholder="Mahsulot" required style="flex:1 1 100px"/>
+      <input name="price" type="number" min="0" step="0.01" placeholder="Narx" style="width:80px"/>
+      <input name="qty" type="number" min="1" value="1" placeholder="Soni" style="width:60px"/>
+      <button type="submit">Buyurtma berish</button>
+    </form>
+    <div id="orderMsg" class="muted"></div>
+    <table>
+      <thead><tr><th>#</th><th>Xona</th><th>Holat</th><th>Jami</th><th></th></tr></thead>
+      <tbody id="ordersBody"></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Texnik xizmat navbati</h2>
+    <form class="inline" id="issueForm">
+      <input name="roomNumber" placeholder="Xona" required style="width:80px"/>
+      <input name="description" placeholder="Muammo tavsifi" required style="flex:1 1 140px"/>
+      <select name="urgency">
+        <option value="kritik">Kritik</option>
+        <option value="yuqori">Yuqori</option>
+        <option value="normal" selected>Normal</option>
+        <option value="past">Past</option>
+      </select>
+      <button type="submit">Xabar berish</button>
+    </form>
+    <div id="issueMsg" class="muted"></div>
+    <table>
+      <thead><tr><th>#</th><th>Xona</th><th>Shoshilinchlik</th><th>Texnik</th><th></th></tr></thead>
+      <tbody id="issuesBody"></tbody>
+    </table>
+  </section>
+
+  <section id="log">
+    <h2>Faoliyat jurnali (real vaqtli)</h2>
+    <div id="logBody"></div>
+  </section>
+
+</main>
+
+<script>
+const RECEPTION = 'http://localhost:7001';
+const HOUSEKEEPING = 'http://localhost:7002';
+const ROOMSERVICE = 'http://localhost:7003';
+const MAINTENANCE = 'http://localhost:7004';
+
+let ws = null;
+let cleaningRoomNumbers = new Set();
+
+function logLine(text) {
+  const el = document.getElementById('logBody');
+  const div = document.createElement('div');
+  const time = new Date().toLocaleTimeString();
+  div.textContent = `[${time}] ${text}`;
+  el.prepend(div);
+  while (el.children.length > 150) el.removeChild(el.lastChild);
+}
+
+async function jsonFetch(url, opts) {
+  const res = await fetch(url, opts);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+  return data;
+}
+
+// ---------- Rooms ----------
+async function refreshRooms() {
+  try {
+    const rooms = await jsonFetch(`${RECEPTION}/rooms`);
+    const body = document.getElementById('roomsBody');
+    body.innerHTML = '';
+    for (const r of rooms.sort((a,b) => a.number.localeCompare(b.number))) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${r.number}</td><td>${r.floor}</td><td>${r.type}</td>
+        <td><span class="badge b-${r.status}">${r.status}</span></td>
+        <td>${r.occupied ? 'Ha' : "Yo'q"}</td>`;
+      body.appendChild(tr);
+    }
+  } catch (err) { logLine(`Xatolik (xonalar): ${err.message}`); }
+}
+
+document.getElementById('checkinForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const msg = document.getElementById('checkinMsg');
+  try {
+    const body = {
+      guestName: f.get('guestName'),
+      roomType: f.get('roomType'),
+      nights: Number(f.get('nights')) || 1,
+    };
+    if (f.get('floorPreference')) body.floorPreference = Number(f.get('floorPreference'));
+    const result = await jsonFetch(`${RECEPTION}/checkin`, {
+      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body)
+    });
+    msg.textContent = `Tayinlandi: xona ${result.room.number}`;
+    msg.className = 'muted';
+    e.target.reset();
+    refreshRooms();
+  } catch (err) {
+    msg.textContent = err.message; msg.className = 'err';
+  }
+});
+
+document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const msg = document.getElementById('checkoutMsg');
+  try {
+    const body = {};
+    if (f.get('discount')) body.discount = Number(f.get('discount'));
+    const result = await jsonFetch(`${RECEPTION}/checkout/${encodeURIComponent(f.get('roomNumber'))}`, {
+      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body)
+    });
+    msg.textContent = `Jami hisob: ${result.bill.jamiSumma}`;
+    msg.className = 'muted';
+    e.target.reset();
+    refreshRooms();
+  } catch (err) {
+    msg.textContent = err.message; msg.className = 'err';
+  }
+});
+
+// ---------- Room service orders ----------
+async function refreshOrders() {
+  try {
+    const orders = await jsonFetch(`${ROOMSERVICE}/orders`);
+    const body = document.getElementById('ordersBody');
+    body.innerHTML = '';
+    for (const o of orders) {
+      const tr = document.createElement('tr');
+      const nextBtn = o.status !== 'yetkazildi'
+        ? `<button class="mini" onclick="advanceOrder('${o.id}')">Keyingi bosqich</button>` : '';
+      tr.innerHTML = `<td>${o.id}</td><td>${o.roomNumber}</td><td>${o.status}</td><td>${o.total}</td><td>${nextBtn}</td>`;
+      body.appendChild(tr);
+    }
+  } catch (err) { logLine(`Xatolik (buyurtmalar): ${err.message}`); }
+}
+window.advanceOrder = async (id) => {
+  try { await jsonFetch(`${ROOMSERVICE}/orders/${id}/advance`, { method: 'POST' }); refreshOrders(); }
+  catch (err) { logLine(`Xatolik: ${err.message}`); }
+};
+
+document.getElementById('orderForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const msg = document.getElementById('orderMsg');
+  try {
+    const body = {
+      roomNumber: f.get('roomNumber'),
+      items: [{ name: f.get('itemName'), price: Number(f.get('price')) || 0, qty: Number(f.get('qty')) || 1 }],
+    };
+    await jsonFetch(`${ROOMSERVICE}/orders`, {
+      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body)
+    });
+    msg.textContent = 'Buyurtma qabul qilindi'; msg.className = 'muted';
+    e.target.reset();
+    refreshOrders();
+  } catch (err) { msg.textContent = err.message; msg.className = 'err'; }
+});
+
+// ---------- Maintenance ----------
+async function refreshIssues() {
+  try {
+    const issues = await jsonFetch(`${MAINTENANCE}/issues`);
+    const body = document.getElementById('issuesBody');
+    body.innerHTML = '';
+    for (const i of issues) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${i.id}</td><td>${i.roomNumber}</td>
+        <td><span class="badge b-${i.urgency}">${i.urgency}</span></td><td>${i.assignedTo}</td>
+        <td><button class="mini" onclick="resolveIssue('${i.id}')">Yopish</button></td>`;
+      body.appendChild(tr);
+    }
+  } catch (err) { logLine(`Xatolik (muammolar): ${err.message}`); }
+}
+window.resolveIssue = async (id) => {
+  try { await jsonFetch(`${MAINTENANCE}/issues/${id}/resolve`, { method: 'POST' }); refreshIssues(); refreshRooms(); }
+  catch (err) { logLine(`Xatolik: ${err.message}`); }
+};
+
+document.getElementById('issueForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const msg = document.getElementById('issueMsg');
+  try {
+    await jsonFetch(`${MAINTENANCE}/issues`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ roomNumber: f.get('roomNumber'), description: f.get('description'), urgency: f.get('urgency') })
+    });
+    msg.textContent = 'Xabar yuborildi'; msg.className = 'muted';
+    e.target.reset();
+    refreshIssues();
+    refreshRooms();
+  } catch (err) { msg.textContent = err.message; msg.className = 'err'; }
+});
+
+// ---------- WebSocket (real-time) ----------
+document.getElementById('connectBtn').addEventListener('click', () => {
+  const token = document.getElementById('tokenInput').value.trim();
+  if (ws) ws.close();
+  ws = new WebSocket(`ws://${location.hostname}:7000/?role=dashboard&token=${encodeURIComponent(token)}`);
+  const stateEl = document.getElementById('connState');
+
+  ws.addEventListener('open', () => {
+    stateEl.textContent = 'Ulandi'; stateEl.className = 'st-on';
+    ws.send(JSON.stringify({ type: 'subscribe', events: [
+      'room.checked_out', 'room.status_changed',
+      'room_service.order_created', 'room_service.status_changed',
+      'maintenance.reported', 'maintenance.resolved'
+    ]}));
+    logLine('Panel brokerga ulandi.');
+  });
+
+  ws.addEventListener('close', () => {
+    stateEl.textContent = 'Ulanmagan'; stateEl.className = 'st-off';
+  });
+
+  ws.addEventListener('message', (ev) => {
+    let msg;
+    try { msg = JSON.parse(ev.data); } catch (_e) { return; }
+    if (msg.type === 'auth_error') { logLine(`Autentifikatsiya xatosi: ${msg.message}`); return; }
+    if (msg.type !== 'event') return;
+    logLine(`${msg.event} :: ${JSON.stringify(msg.payload)}`);
+
+    if (msg.event === 'room.checked_out' || msg.event === 'room.status_changed') refreshRooms();
+    if (msg.event.startsWith('room_service.')) refreshOrders();
+    if (msg.event.startsWith('maintenance.')) { refreshIssues(); refreshRooms(); }
+  });
+});
+
+// Initial load + periodic safety-net refresh (covers any state changes triggered
+// from outside the dashboard, e.g. via curl, without waiting on the event log).
+refreshRooms(); refreshOrders(); refreshIssues();
+setInterval(() => { refreshRooms(); refreshOrders(); refreshIssues(); }, 6000);
+document.getElementById('connectBtn').click();
+</script>
+
+</body>
+</html>
