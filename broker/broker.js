@@ -46,17 +46,17 @@ const httpServer = http.createServer((req, res) => {
   const pathname = url.pathname;
   
   // Route API requests to appropriate microservices
-  if (pathname.startsWith('/rooms') || pathname.startsWith('/guests') || pathname.startsWith('/checkin') || pathname.startsWith('/checkout')) {
-    return proxyRequest(req, res, 'localhost', 7001);
+  if (pathname.startsWith('/rooms') || pathname.startsWith('/checkin') || pathname.startsWith('/checkout')) {
+    return proxyRequest(req, res, 'localhost', 7001, logger);
   }
-  if (pathname.startsWith('/queue') || pathname.startsWith('/advance')) {
-    return proxyRequest(req, res, 'localhost', 7002);
+  if (pathname.startsWith('/queue')) {
+    return proxyRequest(req, res, 'localhost', 7002, logger);
   }
   if (pathname.startsWith('/orders')) {
-    return proxyRequest(req, res, 'localhost', 7003);
+    return proxyRequest(req, res, 'localhost', 7003, logger);
   }
-  if (pathname.startsWith('/issues') || pathname.startsWith('/resolve')) {
-    return proxyRequest(req, res, 'localhost', 7004);
+  if (pathname.startsWith('/issues')) {
+    return proxyRequest(req, res, 'localhost', 7004, logger);
   }
   
   // Serve static dashboard files

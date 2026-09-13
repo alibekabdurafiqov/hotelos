@@ -131,9 +131,11 @@
 </main>
 
 <script>
-// Microservice APIs are proxied through broker on port 7000
-const HOST = location.hostname;
-const BASE = `http://${HOST}:7000`;
+// Microservice APIs are proxied through broker
+// Use window.location.origin to respect current protocol/hostname/port
+// Local: http://localhost:7000
+// Render: https://hotelos-xxxxx.onrender.com (only ports 80/443 exposed)
+const BASE = window.location.origin;
 
 const RECEPTION = BASE;
 const HOUSEKEEPING = BASE;
