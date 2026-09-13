@@ -1,0 +1,19 @@
+{
+  "name": "hotelos",
+  "version": "1.0.0",
+  "description": "GrandStay Mehmonxonasi uchun real vaqtli mikroservis boshqaruv tizimi (4-Modul loyihasi)",
+  "main": "start.js",
+  "scripts": {
+    "start": "node start.js",
+    "broker": "node broker/broker.js",
+    "reception": "node services/reception.js",
+    "housekeeping": "node services/housekeeping.js",
+    "roomservice": "node services/roomservice.js",
+    "maintenance": "node services/maintenance.js"
+  },
+  "engines": {
+    "node": ">=21.0.0"
+  },
+  "license": "MIT",
+  "dependencies": {}
+}
