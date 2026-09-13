@@ -131,21 +131,14 @@
 </main>
 
 <script>
-// Microservice API URLs
-// For local development: each service has its own port
-// For production (Render): configure via environment or use API_BASE_URL
-const API_BASE_PORT = {
-  reception: 7001,
-  housekeeping: 7002,
-  roomservice: 7003,
-  maintenance: 7004
-};
-
+// Microservice APIs are proxied through broker on port 7000
 const HOST = location.hostname;
-const RECEPTION = `http://${HOST}:${API_BASE_PORT.reception}`;
-const HOUSEKEEPING = `http://${HOST}:${API_BASE_PORT.housekeeping}`;
-const ROOMSERVICE = `http://${HOST}:${API_BASE_PORT.roomservice}`;
-const MAINTENANCE = `http://${HOST}:${API_BASE_PORT.maintenance}`;
+const BASE = `http://${HOST}:7000`;
+
+const RECEPTION = BASE;
+const HOUSEKEEPING = BASE;
+const ROOMSERVICE = BASE;
+const MAINTENANCE = BASE;
 
 let ws = null;
 let cleaningRoomNumbers = new Set();

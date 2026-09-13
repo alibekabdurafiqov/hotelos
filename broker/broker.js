@@ -22,6 +22,7 @@ const fs = require('fs');
 const path = require('path');
 const { attachWebSocketServer } = require('../shared/ws-server');
 const { makeLogger } = require('../shared/logger');
+const { proxyRequest } = require('../shared/proxy');
 
 const PORT = process.env.BROKER_PORT || 7000;
 const ADMIN_TOKEN = process.env.HOTELOS_ADMIN_TOKEN || 'hotelos-admin';
@@ -42,7 +43,24 @@ const MIME = {
 
 const httpServer = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://localhost');
-  let filePath = url.pathname === '/' ? '/dashboard.html' : url.pathname;
+  const pathname = url.pathname;
+  
+  // Route API requests to appropriate microservices
+  if (pathname.startsWith('/rooms') || pathname.startsWith('/guests') || pathname.startsWith('/checkin') || pathname.startsWith('/checkout')) {
+    return proxyRequest(req, res, 'localhost', 7001);
+  }
+  if (pathname.startsWith('/queue') || pathname.startsWith('/advance')) {
+    return proxyRequest(req, res, 'localhost', 7002);
+  }
+  if (pathname.startsWith('/orders')) {
+    return proxyRequest(req, res, 'localhost', 7003);
+  }
+  if (pathname.startsWith('/issues') || pathname.startsWith('/resolve')) {
+    return proxyRequest(req, res, 'localhost', 7004);
+  }
+  
+  // Serve static dashboard files
+  let filePath = pathname === '/' ? '/dashboard.html' : pathname;
   const fullPath = path.join(PUBLIC_DIR, filePath);
 
   // Basic path traversal protection (NFR-01 style hygiene, even for static files).
