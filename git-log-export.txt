@@ -1,0 +1,13 @@
+04179e9 fix(reception): room_service.status_changed payload maydoni nomini tuzatish (newStatus)
+15dcbae docs: to'liq README (o'rnatish, arxitektura, TS-01..TS-08 qo'llanma, debugging misoli) + talab hujjatlari
+5dd7ba0 chore: bitta buyruq bilan barcha servislarni ishga tushiruvchi orkestrator
+56db1f6 feat(dashboard): real vaqtli WebSocket operatsiyalar paneli (FR-07)
+8c3b572 feat(maintenance): ustuvorlik navbati (priority queue) orqali texnik xizmat (FR-03)
+7f46c39 feat(roomservice): buyurtma holatlari oqimi va FIFO navbat (FR-05)
+3c13f9b feat(housekeeping): FIFO tozalash navbati va xona holati oqimi (FR-04)
+8163705 feat(reception): check-in/check-out, xona tayinlash algoritmi (FR-01), hisob-kitob (FR-02)
+3e5c9b5 feat(data): soddalashtirilgan 2-qavat/10-xonalik xona inventari
+f7186e6 chore: umumiy servis kutubxonalari (broker mijozi, mutex, HTTP router, navbat/ustuvorlik navbati)
+31d4a1c feat(broker): markaziy xabar brokeri - pub/sub, autentifikatsiya, statik panel xizmati
+eb863d7 feat(broker): WebSocket serverini noldan (tashqi kutubxonasiz) yozish
+2f8f16a chore: loyihani boshlash - logger va validatsiya yordamchilari
