@@ -131,10 +131,15 @@
 </main>
 
 <script>
-const RECEPTION = 'http://localhost:7001';
-const HOUSEKEEPING = 'http://localhost:7002';
-const ROOMSERVICE = 'http://localhost:7003';
-const MAINTENANCE = 'http://localhost:7004';
+// Detect if running on production or localhost
+const HOST = location.hostname === 'localhost' || location.hostname === '127.0.0.1' 
+  ? 'localhost' 
+  : location.hostname;
+
+const RECEPTION = `http://${HOST}:7001`;
+const HOUSEKEEPING = `http://${HOST}:7002`;
+const ROOMSERVICE = `http://${HOST}:7003`;
+const MAINTENANCE = `http://${HOST}:7004`;
 
 let ws = null;
 let cleaningRoomNumbers = new Set();
@@ -291,7 +296,9 @@ document.getElementById('issueForm').addEventListener('submit', async (e) => {
 document.getElementById('connectBtn').addEventListener('click', () => {
   const token = document.getElementById('tokenInput').value.trim();
   if (ws) ws.close();
-  ws = new WebSocket(`ws://${location.hostname}:7000/?role=dashboard&token=${encodeURIComponent(token)}`);
+  const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const wsUrl = `${protocol}//${HOST}:7000/?role=dashboard&token=${encodeURIComponent(token)}`;
+  ws = new WebSocket(wsUrl);
   const stateEl = document.getElementById('connState');
 
   ws.addEventListener('open', () => {
