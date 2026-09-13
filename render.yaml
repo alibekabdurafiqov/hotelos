@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: hotelos
+    env: docker
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: BROKER_PORT
+        value: 7000
+      - key: RECEPTION_PORT
+        value: 7001
+      - key: HOUSEKEEPING_PORT
+        value: 7002
+      - key: ROOMSERVICE_PORT
+        value: 7003
+      - key: MAINTENANCE_PORT
+        value: 7004
+      - key: HOTELOS_ADMIN_TOKEN
+        value: hotelos-admin
